@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Quiet Center — a small, interactive poem presented as a calm reading experience."
+    />
+    <meta name="theme-color" content="#102a43" />
+    <title>Quiet Center</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23102a43'/%3E%3Cpath d='M17 34c8-13 22-13 30 0-8 13-22 13-30 0Z' fill='%23f7d488'/%3E%3Ccircle cx='32' cy='34' r='5' fill='%23102a43'/%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #102a43;
+        --muted: #52667a;
+        --paper: #eef5f8;
+        --glow: #f7d488;
+        --surface: rgba(255, 255, 255, 0.72);
+        --line: rgba(16, 42, 67, 0.16);
+        --shadow: rgba(16, 42, 67, 0.13);
+        --poem-size: 1.3rem;
+      }
+
+      :root[data-theme="night"] {
+        color-scheme: dark;
+        --ink: #f5f1e8;
+        --muted: #b4c3d0;
+        --paper: #081925;
+        --glow: #f1bd59;
+        --surface: rgba(15, 39, 56, 0.78);
+        --line: rgba(245, 241, 232, 0.16);
+        --shadow: rgba(0, 0, 0, 0.28);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--glow) 20%, transparent) 0, transparent 35rem),
+          var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        transition: background-color 240ms ease, color 240ms ease;
+      }
+
+      button {
+        color: inherit;
+        font: inherit;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 100vh;
+        padding: 1.25rem clamp(1rem, 4vw, 3rem);
+      }
+
+      header,
+      footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        font-size: 0.875rem;
+        font-weight: 750;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .brand-mark {
+        width: 0.72rem;
+        height: 0.72rem;
+        border: 2px solid var(--ink);
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 2px var(--paper);
+        background: var(--glow);
+      }
+
+      .controls {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .control {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface);
+        box-shadow: 0 0.4rem 1.5rem var(--shadow);
+        cursor: pointer;
+        backdrop-filter: blur(12px);
+        transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease;
+      }
+
+      .control:hover {
+        transform: translateY(-2px);
+        border-color: var(--ink);
+      }
+
+      .control:focus-visible {
+        outline: 3px solid var(--glow);
+        outline-offset: 3px;
+      }
+
+      main {
+        display: grid;
+        place-items: center;
+        padding: 4rem 0;
+      }
+
+      .poem-card {
+        position: relative;
+        width: min(100%, 44rem);
+        padding: clamp(2rem, 7vw, 5rem);
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 2rem;
+        background: var(--surface);
+        box-shadow: 0 2rem 5rem var(--shadow);
+        text-align: center;
+        backdrop-filter: blur(20px);
+      }
+
+      .poem-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 4.5rem;
+        height: 0.22rem;
+        transform: translateX(-50%);
+        border-radius: 0 0 999px 999px;
+        background: var(--glow);
+      }
+
+      .eyebrow {
+        margin: 0 0 1rem;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 750;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2.25rem, 8vw, 4.75rem);
+        font-weight: 500;
+        letter-spacing: -0.045em;
+        line-height: 0.95;
+      }
+
+      .poem {
+        margin: clamp(2rem, 5vw, 3rem) auto 0;
+        color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: var(--poem-size);
+        line-height: 1.9;
+      }
+
+      .poem p {
+        margin: 0;
+      }
+
+      .poem p + p {
+        margin-top: 1.25rem;
+      }
+
+      .copy-row {
+        margin-top: clamp(2rem, 5vw, 3rem);
+      }
+
+      .copy-button {
+        padding: 0.75rem 1.2rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: transparent;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .copy-button:hover {
+        background: color-mix(in srgb, var(--glow) 22%, transparent);
+      }
+
+      footer {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .hint {
+        text-align: right;
+      }
+
+      @media (max-width: 600px) {
+        .shell {
+          padding: 1rem;
+        }
+
+        .poem-card {
+          border-radius: 1.5rem;
+        }
+
+        footer .hint {
+          display: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header aria-label="Page controls">
+        <div class="brand"><span class="brand-mark" aria-hidden="true"></span> Quiet Center</div>
+        <div class="controls">
+          <button class="control" id="smaller" type="button" aria-label="Make poem text smaller">A−</button>
+          <button class="control" id="larger" type="button" aria-label="Make poem text larger">A+</button>
+          <button class="control" id="theme" type="button" aria-label="Switch to night theme" aria-pressed="false">☾</button>
+        </div>
+      </header>
+
+      <main>
+        <article class="poem-card" aria-labelledby="poem-title">
+          <p class="eyebrow">A small pause</p>
+          <h1 id="poem-title">Between Hours</h1>
+          <div class="poem" id="poem-text">
+            <p>The day sets down its silver keys,<br />and leaves the doors unlocked.</p>
+            <p>A quiet gathers in the trees;<br />the hurried world has stopped.</p>
+            <p>Stay here until the light grows thin—<br />there is no race to win.</p>
+          </div>
+          <div class="copy-row">
+            <button class="copy-button" id="copy" type="button">Copy poem</button>
+          </div>
+        </article>
+      </main>
+
+      <footer>
+        <span>An original poem · 2026</span>
+        <span class="hint">Use the controls to make the page yours.</span>
+      </footer>
+    </div>
+
+    <script>
+      const root = document.documentElement;
+      const themeButton = document.querySelector("#theme");
+      const smallerButton = document.querySelector("#smaller");
+      const largerButton = document.querySelector("#larger");
+      const copyButton = document.querySelector("#copy");
+      const sizes = [1.05, 1.3, 1.55];
+      let sizeIndex = 1;
+
+      const setTheme = (theme) => {
+        root.dataset.theme = theme;
+        const isNight = theme === "night";
+        themeButton.textContent = isNight ? "☀" : "☾";
+        themeButton.setAttribute("aria-pressed", String(isNight));
+        themeButton.setAttribute("aria-label", `Switch to ${isNight ? "day" : "night"} theme`);
+      };
+
+      setTheme(localStorage.getItem("quiet-center-theme") || "day");
+
+      themeButton.addEventListener("click", () => {
+        const theme = root.dataset.theme === "night" ? "day" : "night";
+        setTheme(theme);
+        localStorage.setItem("quiet-center-theme", theme);
+      });
+
+      const setTextSize = (nextIndex) => {
+        sizeIndex = Math.max(0, Math.min(sizes.length - 1, nextIndex));
+        root.style.setProperty("--poem-size", `${sizes[sizeIndex]}rem`);
+        smallerButton.disabled = sizeIndex === 0;
+        largerButton.disabled = sizeIndex === sizes.length - 1;
+      };
+
+      smallerButton.addEventListener("click", () => setTextSize(sizeIndex - 1));
+      largerButton.addEventListener("click", () => setTextSize(sizeIndex + 1));
+
+      copyButton.addEventListener("click", async () => {
+        const poem = `Between Hours\n\nThe day sets down its silver keys,\nand leaves the doors unlocked.\n\nA quiet gathers in the trees;\nthe hurried world has stopped.\n\nStay here until the light grows thin—\nthere is no race to win.`;
+        try {
+          await navigator.clipboard.writeText(poem);
+          copyButton.textContent = "Copied";
+        } catch {
+          copyButton.textContent = "Copy unavailable";
+        }
+        window.setTimeout(() => (copyButton.textContent = "Copy poem"), 1800);
+      });
+    </script>
+  </body>
+</html>
