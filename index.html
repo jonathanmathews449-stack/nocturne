@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050714" />
+    <meta name="description" content="Nocturne — an interactive constellation that becomes a poem beneath your fingertips." />
+    <title>Nocturne — A Living Poem</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23050714'/%3E%3Cpath d='M32 9l4.3 18.7L55 32l-18.7 4.3L32 55l-4.3-18.7L9 32l18.7-4.3L32 9Z' fill='%23d9ff6d'/%3E%3Ccircle cx='32' cy='32' r='4' fill='%23fff'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <canvas id="sky" aria-hidden="true"></canvas>
+    <div class="aurora aurora-one" aria-hidden="true"></div>
+    <div class="aurora aurora-two" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="identity" href="#" aria-label="Restart Nocturne">
+          <span class="identity-mark" aria-hidden="true"></span>
+          <span>Nocturne</span>
+          <span class="edition">Field 01</span>
+        </a>
+        <div class="top-actions">
+          <button class="icon-button" id="palette-button" type="button" aria-label="Change atmosphere">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3H12a2 2 0 0 1 0-4h3.5A5.5 5.5 0 0 0 21 8.5C21 5.5 17 3 12 3Z"/><circle cx="7.5" cy="10" r="1"/><circle cx="10" cy="6.8" r="1"/><circle cx="15" cy="7" r="1"/></svg>
+          </button>
+          <button class="icon-button" id="sound-button" type="button" aria-label="Turn sound on" aria-pressed="false">
+            <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9v6h4l5 4V5L9 9H5Z"/><path d="M17 8a6 6 0 0 1 0 8M19.5 5.5a9.2 9.2 0 0 1 0 13"/></svg>
+            <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9v6h4l5 4V5L9 9H5Z"/><path d="m17 9 4 4m0-4-4 4"/></svg>
+          </button>
+          <button class="icon-button" id="fullscreen-button" type="button" aria-label="Enter fullscreen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5m13 5h5v-5"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="intro" id="intro" aria-labelledby="intro-title">
+          <p class="kicker"><span></span>An interactive poem</p>
+          <h1 id="intro-title">The night<br />remembers<br /><em>your touch.</em></h1>
+          <p class="intro-copy">Five bright fragments are waiting in the dark. Find them, and the sky will write back.</p>
+          <button class="enter-button" id="enter-button" type="button"><span>Enter the field</span><span class="arrow" aria-hidden="true">↗</span></button>
+          <p class="intro-note">Headphones make the silence sing.</p>
+        </section>
+
+        <section class="experience" id="experience" aria-label="Interactive constellation" hidden>
+          <div class="status-panel">
+            <p class="status-label">Fragments found</p>
+            <div class="progress-row">
+              <span class="progress-number"><strong id="found-count">0</strong> / 5</span>
+              <div class="progress-track" aria-hidden="true"><span id="progress-fill"></span></div>
+            </div>
+          </div>
+          <div class="line-reveal" id="line-reveal" aria-live="polite"></div>
+          <div class="field-guide" id="field-guide"><span class="pulse-dot" aria-hidden="true"></span><span>Move through the field. Touch the brighter stars.</span></div>
+          <button class="keyboard-action" id="keyboard-action" type="button">Awaken next star</button>
+          <section class="finale" id="finale" aria-labelledby="finale-title" hidden>
+            <button class="finale-close" id="finale-close" type="button" aria-label="Close completed poem">×</button>
+            <p class="kicker"><span></span>Your constellation</p>
+            <h2 id="finale-title">A sky of your own</h2>
+            <blockquote id="completed-poem"></blockquote>
+            <div class="finale-actions">
+              <button class="text-button primary" id="copy-button" type="button">Copy poem</button>
+              <button class="text-button" id="restart-button" type="button">Begin again</button>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>Move slowly. The stars notice.</p>
+        <button class="drift-button" id="drift-button" type="button"><span>Make the sky drift</span><span aria-hidden="true">✦</span></button>
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
+
