@@ -40,7 +40,7 @@
         <button class="identity" type="button" aria-label="Restart Nocturne">
           <span class="identity-mark" aria-hidden="true"></span>
           <span>Nocturne</span>
-          <span class="edition">Field 01</span>
+          <span class="edition" id="edition">Field 01 / 03</span>
         </button>
         <div class="top-actions">
           <button class="icon-button" id="palette-button" type="button" aria-label="Change atmosphere">
@@ -81,12 +81,15 @@
             <p class="kicker"><span></span>Your constellation</p>
             <h2 id="finale-title">A sky of your own</h2>
             <blockquote id="completed-poem"></blockquote>
+            <p class="finale-note" id="finale-note"></p>
             <div class="finale-actions">
-              <button class="text-button primary" id="copy-button" type="button">Copy poem</button>
+              <button class="text-button primary" id="next-field" type="button">The next sky ↗</button>
+              <button class="text-button" id="copy-button" type="button">Copy poem</button>
               <button class="text-button" id="restart-button" type="button">Begin again</button>
             </div>
           </section>
         </section>
+        <p class="sr-only" id="status" role="status"></p>
       </main>
 
       <footer class="footer">
