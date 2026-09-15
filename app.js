@@ -220,6 +220,15 @@ function showFinale() {
   finale.querySelector("button").focus();
 }
 
+// Closing the finale hides the button that was just pressed — both the close
+// button and "Begin again" live inside it — so focus has to be handed somewhere
+// rendered, or the keyboard user is left on <body> with nothing selected.
+function closeFinale() {
+  if (finale.hidden) return;
+  finale.hidden = true;
+  keyboardAction.focus({ preventScroll: true });
+}
+
 function resetExperience() {
   memoryStars.forEach((star) => (star.found = false));
   particles = [];
@@ -227,7 +236,7 @@ function resetExperience() {
   foundCount.textContent = "0";
   progressFill.style.width = "0";
   fieldGuide.style.opacity = "1";
-  finale.hidden = true;
+  closeFinale();
   lineReveal.textContent = "";
   lineReveal.classList.remove("visible", "leaving");
 }
@@ -246,12 +255,14 @@ function begin() {
 }
 
 enterButton.addEventListener("click", begin);
-document.querySelector(".identity").addEventListener("click", (event) => {
-  event.preventDefault();
+document.querySelector(".identity").addEventListener("click", () => {
   resetExperience();
   started = false;
   experience.hidden = true;
   intro.hidden = false;
+  // Same reason as closeFinale: whatever had focus is inside the section that
+  // just went away.
+  enterButton.focus({ preventScroll: true });
   requestAnimationFrame(() => intro.classList.remove("is-leaving"));
 });
 canvas.addEventListener("pointermove", (event) => (pointer = { x: event.clientX, y: event.clientY }));
@@ -288,7 +299,11 @@ copyButton.addEventListener("click", async () => {
   window.setTimeout(() => (copyButton.textContent = "Copy poem"), 1800);
 });
 restartButton.addEventListener("click", resetExperience);
-finaleClose.addEventListener("click", () => (finale.hidden = true));
+finaleClose.addEventListener("click", closeFinale);
+// An overlay with no Escape is a keyboard trap in everything but name.
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !finale.hidden) closeFinale();
+});
 window.addEventListener("resize", resize);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) cancelAnimationFrame(animationFrame);

@@ -1,0 +1,10 @@
+# Nocturne — https://jonathanmathews449-stack.github.io/nocturne/
+#
+# One public page and nothing behind it: no user content, no query parameters,
+# no private paths. og-source.html is a build input rather than a page, so it
+# is kept out of the index here as well as by its own robots meta tag.
+User-agent: *
+Allow: /
+Disallow: /og-source.html
+
+Sitemap: https://jonathanmathews449-stack.github.io/nocturne/sitemap.xml

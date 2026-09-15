@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Nocturne — og:image source</title>
+<!--
+  Source for og.png. Unlike the sites inside the shared workspace, this
+  repository IS the published one, so this file ships — hence the noindex above
+  and the Disallow in robots.txt. Keeping it here is deliberate: the next agent
+  can see how the card was made instead of guessing.
+
+  Render it with, from the shared workspace:
+
+      bash scripts/og-image.sh "/c/Users/AI DEV/Documents/centered-poem"
+
+  Rules that apply to every card in this portfolio:
+    * Fixed 1200x630. The script verifies the dimensions out of the PNG header
+      and fails if they are wrong.
+    * No network. Chrome renders this with networking off, so a webfont or a
+      remote image would silently fall back and the screenshot would capture
+      the wrong layout. Everything here is a system font or inline CSS.
+    * Nothing under about 28px. Cards are shown small; small type turns to mud.
+    * Total content height must stay under 630px — overflow is clipped top AND
+      bottom, with no error. Re-render and LOOK at the PNG after any change.
+
+  The stars are placed with the same normalised coordinates as the five memory
+  stars in app.js, so the card shows the real constellation rather than an
+  invented one.
+-->
+<style>
+  /* Tokens copied from styles.css, default "nocturne" palette. */
+  :root {
+    --bg:     #050714;
+    --bg-deep:#02030a;
+    --ink:    #f4f2ea;
+    --muted:  #979bad;
+    --accent: #d9ff6d;
+    --violet: #7f63ff;
+    --cyan:   #55dbe8;
+    --display: Didot, "Bodoni MT", Georgia, serif;
+    --sans: "Segoe UI", ui-sans-serif, system-ui, Roboto, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 1200px; height: 630px;
+    overflow: hidden;
+    position: relative;
+    background: radial-gradient(circle at 50% 45%, var(--bg), var(--bg-deep) 72%);
+    color: var(--ink);
+    font-family: var(--sans);
+  }
+
+  /* The two auroras, flattened: the live site blurs and screen-blends them,
+     which headless Chrome renders fine, but a plain radial gradient is the
+     same result at this size and cannot surprise the screenshot. */
+  .aurora {
+    position: absolute; border-radius: 50%; filter: blur(90px); opacity: .17;
+    mix-blend-mode: screen;
+  }
+  .aurora-one { top: -18%; left: -12%; width: 58%; height: 70%; background: var(--violet); }
+  .aurora-two { bottom: -26%; right: -12%; width: 64%; height: 72%; background: var(--cyan); }
+
+  svg.field { position: absolute; inset: 0; width: 1200px; height: 630px; }
+
+  .plate {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 86px;
+  }
+  .kicker {
+    display: flex; align-items: center; gap: 18px;
+    margin: 0 0 30px;
+    color: var(--accent);
+    font-size: 28px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
+  }
+  .kicker i { display: block; width: 62px; height: 2px; background: currentColor; }
+  h1 {
+    margin: 0;
+    font-family: var(--display); font-weight: 400; font-size: 132px; line-height: .98;
+    letter-spacing: -.01em;
+  }
+  h1 em { font-style: italic; color: transparent; -webkit-text-stroke: 2px rgba(244,242,234,.72); }
+  p {
+    margin: 34px 0 0;
+    max-width: 700px;
+    color: var(--muted);
+    font-size: 32px; line-height: 1.45;
+  }
+  .mark {
+    position: absolute; right: 86px; bottom: 54px;
+    display: flex; align-items: center; gap: 16px;
+    color: var(--muted); font-size: 26px; letter-spacing: .18em; text-transform: uppercase;
+  }
+  .mark i {
+    display: block; width: 16px; height: 16px; transform: rotate(45deg);
+    border: 2px solid var(--accent);
+  }
+</style>
+</head>
+<body>
+  <div class="aurora aurora-one"></div>
+  <div class="aurora aurora-two"></div>
+
+  <!-- The five memory stars at the app.js coordinates, joined in order, so the
+       card shows the real constellation. The group is scaled and moved into the
+       top right: at full size two of the stars land on top of the strapline and
+       the joining line crosses the word "poem". -->
+  <svg class="field" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(581.6,-13.05) scale(0.55)">
+      <polyline points="288,195 864,151 684,365 984,435 396,479"
+                fill="none" stroke="#d9ff6d" stroke-opacity=".34" stroke-width="2.6" />
+      <g fill="#ffffff">
+        <circle cx="288" cy="195" r="9" /><circle cx="864" cy="151" r="10" />
+        <circle cx="684" cy="365" r="8.6" /><circle cx="984" cy="435" r="9.5" />
+        <circle cx="396" cy="479" r="10.6" />
+      </g>
+      <g fill="none" stroke="#d9ff6d" stroke-opacity=".4" stroke-width="2.4">
+        <circle cx="288" cy="195" r="30" /><circle cx="864" cy="151" r="33" />
+        <circle cx="684" cy="365" r="28" /><circle cx="984" cy="435" r="31" />
+        <circle cx="396" cy="479" r="34" />
+      </g>
+    </g>
+    <!-- Ambient stars, kept out of the text plate on the left. -->
+    <g fill="#ffffff" fill-opacity=".5">
+      <circle cx="140" cy="76" r="1.6" /><circle cx="470" cy="58" r="1.2" />
+      <circle cx="1140" cy="330" r="1.5" /><circle cx="96" cy="560" r="1.3" />
+      <circle cx="1052" cy="470" r="1.4" /><circle cx="700" cy="596" r="1.2" />
+      <circle cx="884" cy="592" r="1.5" /><circle cx="1176" cy="120" r="1.1" />
+    </g>
+  </svg>
+
+  <div class="plate">
+    <p class="kicker"><i></i>An interactive poem</p>
+    <h1>Nocturne<br><em>A living poem</em></h1>
+    <p>Five bright fragments are waiting in the dark. Find them, and the sky will write back.</p>
+  </div>
+
+  <div class="mark"><i></i>Field 01</div>
+</body>
+</html>
