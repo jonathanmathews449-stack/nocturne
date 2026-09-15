@@ -28,6 +28,7 @@ const attunePoints = document.querySelector("#attune-points");
 const attuneCopy = document.querySelector("#attune-copy");
 const attuneReplay = document.querySelector("#attune-replay");
 const attuneLeave = document.querySelector("#attune-leave");
+const attuneSkip = document.querySelector("#attune-skip");
 const enterLabel = document.querySelector("#enter-label");
 const journalProgress = document.querySelector("#journal-progress");
 const journalList = document.querySelector("#journal-list");
@@ -80,14 +81,14 @@ const FIELDS = [
   {
     id: "tide",
     edition: "Field 03",
-    title: "The dark says my name",
+    title: "Borrowed light",
     palette: "tide",
     lines: [
       "I have started apologising to the water.",
-      "The stars are fine. The stars are always fine.",
-      "I am the last instrument still reading wrong—",
-      "count them, count them, they go out in order,",
-      "and the dark says my name the way a friend would."
+      "The stars are fine. The stars are fine. The stars are—",
+      "Someone is counting and it is not me. Someone is counting.",
+      "I am a brief arrangement of borrowed light, and the loan is called.",
+      "The dark says my name. The dark has always known my name."
     ],
     stars: [
       { nx: 0.30, ny: 0.22, radius: 6.0 },
@@ -659,6 +660,18 @@ canvas.addEventListener("pointerleave", () => (pointer = { x: -1000, y: -1000 })
 canvas.addEventListener("pointerdown", (event) => awakenAt(event.clientX, event.clientY));
 attuneReplay.addEventListener("click", playSequence);
 attuneLeave.addEventListener("click", () => closeAttunement(keyboardAction));
+
+// A puzzle nobody can leave is a wall, not a poem. Skipping awakens the star and
+// reveals its line exactly as solving would: the sequence is the texture here,
+// not the toll. Announced, because the line arriving without the chime that
+// usually precedes it is otherwise unexplained.
+attuneSkip.addEventListener("click", () => {
+  if (!attuneStar) return;
+  const star = attuneStar;
+  closeAttunement(keyboardAction);
+  setStatus("Skipped. The star opens anyway.");
+  awaken(star);
+});
 
 keyboardAction.addEventListener("click", () => {
   const next = memoryStars.find((star) => !star.found);

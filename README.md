@@ -9,7 +9,8 @@ way.
 
 Each memory star plays a short sequence across five satellites and asks you to echo
 it back. The sequences lengthen as you go deeper, and the final field asks for them
-backwards. There is no fail state; a wrong answer simply plays the sequence again.
+backwards. There is no fail state: a wrong answer simply plays the sequence again,
+and any star can be skipped outright.
 
 Progress is kept in `localStorage` behind guards, so the site resumes where you left
 off and still works perfectly where storage is blocked — it simply forgets.

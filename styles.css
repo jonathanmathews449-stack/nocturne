@@ -130,13 +130,13 @@ h1 em { display:inline-block; color:transparent; font-style:italic; -webkit-text
   background:rgba(10,7,24,.72); backdrop-filter:blur(12px); pointer-events:auto;
 }
 .attune-copy { margin:0 .4rem 0 .2rem; color:var(--ink); font-size:.8rem; }
-.attune-replay, .attune-leave {
+.attune-replay, .attune-leave, .attune-skip {
   padding:.5rem .9rem; border:1px solid var(--line); border-radius:999px;
   background:transparent; color:var(--muted); cursor:pointer;
   font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
 }
 .attune-replay { border-color:var(--accent); color:var(--accent); }
-.attune-replay:hover, .attune-leave:hover { background:rgba(255,255,255,.06); }
+.attune-replay:hover, .attune-leave:hover, .attune-skip:hover { background:rgba(255,255,255,.06); }
 
 @media (max-width:720px) {
   .attune-bar { bottom:4.2rem; width:min(92vw,22rem); border-radius:1rem; }
