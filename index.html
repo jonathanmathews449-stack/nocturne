@@ -83,8 +83,21 @@
             </div>
           </div>
           <div class="line-reveal" id="line-reveal" aria-live="polite"></div>
-          <div class="field-guide" id="field-guide"><span class="pulse-dot" aria-hidden="true"></span><span>Move through the field. Touch the brighter stars.</span></div>
-          <button class="keyboard-action" id="keyboard-action" type="button">Awaken next star</button>
+          <div class="field-guide" id="field-guide"><span class="pulse-dot" aria-hidden="true"></span><span>Move through the field. Touch a brighter star, then echo what it plays.</span></div>
+          <!--
+            The attunement. Satellites are real buttons positioned over the
+            canvas rather than shapes hit-tested inside it, so keyboard, touch
+            and assistive technology all work without a second implementation.
+          -->
+          <div class="attune" id="attune" hidden>
+            <div class="attune-points" id="attune-points"></div>
+            <div class="attune-bar">
+              <p class="attune-copy" id="attune-copy"></p>
+              <button class="attune-replay" id="attune-replay" type="button">Play it again</button>
+              <button class="attune-leave" id="attune-leave" type="button">Step back</button>
+            </div>
+          </div>
+          <button class="keyboard-action" id="keyboard-action" type="button">Attune the next star</button>
           <section class="finale" id="finale" aria-labelledby="finale-title" hidden>
             <button class="finale-close" id="finale-close" type="button" aria-label="Close completed poem">×</button>
             <p class="kicker"><span></span>Your constellation</p>

@@ -103,3 +103,42 @@ h1 em { display:inline-block; color:transparent; font-style:italic; -webkit-text
   .finale { padding:2.3rem 1.5rem 1.5rem; }
 }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
+
+/* --- Attunement ------------------------------------------------------ */
+
+.attune { position:absolute; inset:0; pointer-events:none; }
+.attune[hidden] { display:none; }
+.attune-points { position:absolute; inset:0; }
+
+/* Positioned in px by positionSatellites(), which runs again on resize. */
+.attune-point {
+  position:absolute; width:2.6rem; height:2.6rem; margin:-1.3rem 0 0 -1.3rem;
+  border:1px solid var(--accent); border-radius:50%;
+  background:rgba(255,255,255,.04); color:var(--ink);
+  pointer-events:auto; cursor:pointer;
+  transition:transform 160ms, background 160ms, box-shadow 200ms;
+}
+.attune-point:hover { transform:scale(1.12); background:var(--accent-soft); }
+.attune-point:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+.attune-point.is-lit { background:var(--accent); box-shadow:0 0 1.6rem var(--accent); transform:scale(1.2); }
+.attune-point.is-wrong { border-color:var(--ink); background:rgba(255,255,255,.22); transform:scale(.92); }
+
+.attune-bar {
+  position:absolute; left:50%; bottom:5.5rem; transform:translateX(-50%);
+  display:flex; align-items:center; flex-wrap:wrap; justify-content:center; gap:.6rem;
+  padding:.7rem 1rem; border:1px solid var(--line); border-radius:999px;
+  background:rgba(10,7,24,.72); backdrop-filter:blur(12px); pointer-events:auto;
+}
+.attune-copy { margin:0 .4rem 0 .2rem; color:var(--ink); font-size:.8rem; }
+.attune-replay, .attune-leave {
+  padding:.5rem .9rem; border:1px solid var(--line); border-radius:999px;
+  background:transparent; color:var(--muted); cursor:pointer;
+  font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+}
+.attune-replay { border-color:var(--accent); color:var(--accent); }
+.attune-replay:hover, .attune-leave:hover { background:rgba(255,255,255,.06); }
+
+@media (max-width:720px) {
+  .attune-bar { bottom:4.2rem; width:min(92vw,22rem); border-radius:1rem; }
+  .attune-copy { flex:1 1 100%; text-align:center; }
+}

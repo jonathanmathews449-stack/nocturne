@@ -23,6 +23,11 @@ const finaleTitle = document.querySelector("#finale-title");
 const finaleNote = document.querySelector("#finale-note");
 const editionLabel = document.querySelector("#edition");
 const statusRegion = document.querySelector("#status");
+const attune = document.querySelector("#attune");
+const attunePoints = document.querySelector("#attune-points");
+const attuneCopy = document.querySelector("#attune-copy");
+const attuneReplay = document.querySelector("#attune-replay");
+const attuneLeave = document.querySelector("#attune-leave");
 const enterLabel = document.querySelector("#enter-label");
 const journalProgress = document.querySelector("#journal-progress");
 const journalList = document.querySelector("#journal-list");
@@ -35,14 +40,14 @@ const FIELDS = [
   {
     id: "nocturne",
     edition: "Field 01",
-    title: "A sky of your own",
+    title: "The world, still here",
     palette: "nocturne",
     lines: [
-      "I touched the dark and found it listening—",
-      "a lantern opened where my hand had been.",
-      "The distance folded into silver wings;",
-      "even the quiet learned a name for me.",
-      "By morning, I had taught the stars to stay."
+      "Morning came and found the world still here—",
+      "green at the edges, patient, breathing, whole.",
+      "I put my hand against a living thing",
+      "and felt it answer: yes, and yes, and yes.",
+      "There is enough. There has always been enough."
     ],
     stars: [
       { nx: 0.24, ny: 0.31, radius: 5.8 },
@@ -55,14 +60,14 @@ const FIELDS = [
   {
     id: "ember",
     edition: "Field 02",
-    title: "What the fire kept",
+    title: "Something is eating the edges",
     palette: "ember",
     lines: [
-      "Something kept a small fire for me here,",
-      "banked under ash the colour of old coins.",
-      "I knelt, and it remembered how to breathe;",
-      "the room came back in amber, one wall at a time.",
-      "Nothing was saved. Everything was kept."
+      "Then the summer arrived wearing someone else's heat.",
+      "The river went quiet in a way that rivers don't.",
+      "I counted the birds I never used to count.",
+      "Something is eating the edges of the map.",
+      "The world is still here. I keep saying it aloud."
     ],
     stars: [
       { nx: 0.18, ny: 0.58, radius: 6.2 },
@@ -75,14 +80,14 @@ const FIELDS = [
   {
     id: "tide",
     edition: "Field 03",
-    title: "Everything the water learned",
+    title: "The dark says my name",
     palette: "tide",
     lines: [
-      "The water took the shape of what I carried",
-      "and gave it back as light, and lighter still.",
-      "I let the current have my careful hands.",
-      "What I had held so long went out like tide—",
-      "and the whole sea turned over, learning me."
+      "I have started apologising to the water.",
+      "The stars are fine. The stars are always fine.",
+      "I am the last instrument still reading wrong—",
+      "count them, count them, they go out in order,",
+      "and the dark says my name the way a friend would."
     ],
     stars: [
       { nx: 0.30, ny: 0.22, radius: 6.0 },
@@ -286,6 +291,7 @@ function setStatus(text) {
 // Loading a field is the only place memoryStars and poemLines are built, so the
 // two can never drift apart. `found` is per-field; `completed` is the suite.
 function loadField(index) {
+  closeAttunement();
   fieldIndex = Math.max(0, Math.min(FIELDS.length - 1, index));
   const field = FIELDS[fieldIndex];
   memoryStars = field.stars.map((star) => ({ ...star, found: false }));
@@ -368,9 +374,173 @@ function awaken(star) {
   if (found === memoryStars.length) window.setTimeout(showFinale, 2600);
 }
 
+// Touching a star no longer awakens it; it opens the attunement.
 function awakenAt(x, y) {
+  if (attuneStar) return;
   const candidate = memoryStars.filter((star) => !star.found).map((star) => ({ star, distance: Math.hypot(x - star.nx * width, y - star.ny * height) })).sort((a, b) => a.distance - b.distance)[0];
-  if (candidate && candidate.distance < 55) awaken(candidate.star);
+  if (candidate && candidate.distance < 55) openAttunement(candidate.star);
+}
+
+/* --- Attunement ------------------------------------------------------
+   A star is not a click any more: it plays a short sequence across its five
+   satellites and you play it back. The mechanic carries the arc, so it gets
+   less trustworthy as the fields darken — field 03 asks for the sequence
+   backwards, which is the point at which the poem stops trusting itself.
+
+   There is no fail state. A wrong tap replays the sequence and costs nothing:
+   this is a poem, and a scoreboard would be a different thing entirely. */
+
+const SATELLITES = 5;
+const ATTUNE_RADIUS = 96;
+
+let attuneStar = null;
+let attuneSequence = [];
+let attuneInput = 0;
+let attunePlaying = false;
+let attuneTimers = [];
+const satelliteButtons = [];
+
+function sequenceLengthFor(starIndex) {
+  // Longer as you go deeper into a field, and deeper into the suite.
+  return Math.min(6, 2 + fieldIndex + Math.min(starIndex, 2));
+}
+
+function wantsReverse() {
+  return fieldIndex === 2;   // the field that lies about the order
+}
+
+function clearAttuneTimers() {
+  attuneTimers.forEach((t) => window.clearTimeout(t));
+  attuneTimers = [];
+}
+
+function buildSatellites() {
+  attunePoints.innerHTML = "";
+  satelliteButtons.length = 0;
+  for (let index = 0; index < SATELLITES; index += 1) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "attune-point";
+    button.dataset.index = String(index);
+    button.setAttribute("aria-label", `Point ${index + 1}`);
+    button.addEventListener("click", () => pressSatellite(index));
+    attunePoints.appendChild(button);
+    satelliteButtons.push(button);
+  }
+}
+
+// Satellites are laid out around the star's CURRENT screen position, so this
+// has to run again on resize — the star is stored in normalised coordinates.
+//
+// The ring is clamped as a whole rather than per-point. A star sits as close as
+// nx 0.15, which on a 390px screen is 58px from the left: a fixed 96px ring puts
+// two of its five points off the screen entirely, and clamping them individually
+// would pile them on top of each other. Shrinking the radius and moving the
+// whole ring inboard keeps it circular and keeps every point reachable.
+function positionSatellites() {
+  if (!attuneStar) return;
+  const radius = Math.max(52, Math.min(ATTUNE_RADIUS, Math.min(width, height) * 0.17));
+  const margin = radius + 34;
+  const cx = Math.max(margin, Math.min(width - margin, attuneStar.nx * width));
+  const cy = Math.max(margin, Math.min(height - margin - 70, attuneStar.ny * height));
+  satelliteButtons.forEach((button, index) => {
+    const angle = (index / SATELLITES) * Math.PI * 2 - Math.PI / 2;
+    button.style.left = `${cx + Math.cos(angle) * radius}px`;
+    button.style.top = `${cy + Math.sin(angle) * radius}px`;
+  });
+}
+
+function openAttunement(star) {
+  if (!started || star.found || !finale.hidden || attuneStar) return;
+  attuneStar = star;
+  const starIndex = memoryStars.indexOf(star);
+  const length = sequenceLengthFor(starIndex);
+  attuneSequence = Array.from({ length }, () => Math.floor(Math.random() * SATELLITES));
+  attuneInput = 0;
+  buildSatellites();
+  positionSatellites();
+  attune.hidden = false;
+  fieldGuide.style.opacity = "0";
+  playSequence();
+}
+
+function closeAttunement(focusTarget) {
+  clearAttuneTimers();
+  attuneStar = null;
+  attuneSequence = [];
+  attuneInput = 0;
+  attunePlaying = false;
+  attune.hidden = true;
+  satelliteButtons.forEach((b) => b.classList.remove("is-lit", "is-wrong"));
+  if (focusTarget) focusTarget.focus({ preventScroll: true });
+}
+
+function playSequence() {
+  clearAttuneTimers();
+  attunePlaying = true;
+  attuneInput = 0;
+  satelliteButtons.forEach((b) => b.classList.remove("is-lit", "is-wrong"));
+  const step = reducedMotion ? 520 : 440;
+
+  attuneSequence.forEach((point, order) => {
+    attuneTimers.push(window.setTimeout(() => {
+      const button = satelliteButtons[point];
+      button.classList.add("is-lit");
+      chime(point);
+      attuneTimers.push(window.setTimeout(() => button.classList.remove("is-lit"), step * 0.6));
+    }, step * (order + 1)));
+  });
+
+  attuneTimers.push(window.setTimeout(() => {
+    attunePlaying = false;
+    attuneCopy.textContent = wantsReverse()
+      ? "Now give it back to me backwards."
+      : "Now give it back to me.";
+  }, step * (attuneSequence.length + 1)));
+
+  // A sequence of flashes is unplayable without sight, so it is also spoken.
+  // This is a poem, not a contest: telling everyone the order costs nothing.
+  const spoken = attuneSequence.map((p) => p + 1).join(", ");
+  attuneCopy.textContent = "Listen.";
+  setStatus(
+    `Star ${memoryStars.indexOf(attuneStar) + 1} of ${memoryStars.length}. ` +
+    `The sequence is ${spoken}. ` +
+    (wantsReverse() ? "Repeat it backwards." : "Repeat it in that order.")
+  );
+}
+
+function expectedAt(step) {
+  return wantsReverse()
+    ? attuneSequence[attuneSequence.length - 1 - step]
+    : attuneSequence[step];
+}
+
+function pressSatellite(index) {
+  if (!attuneStar || attunePlaying) return;
+  const button = satelliteButtons[index];
+
+  if (index !== expectedAt(attuneInput)) {
+    button.classList.add("is-wrong");
+    chime(0);
+    setStatus("Not that one. Listen again.");
+    window.setTimeout(() => {
+      button.classList.remove("is-wrong");
+      playSequence();
+    }, 620);
+    return;
+  }
+
+  button.classList.add("is-lit");
+  chime(index);
+  window.setTimeout(() => button.classList.remove("is-lit"), 260);
+  attuneInput += 1;
+
+  if (attuneInput >= attuneSequence.length) {
+    const star = attuneStar;
+    // Hand focus back before the buttons go away, or it lands on <body>.
+    closeAttunement(keyboardAction);
+    awaken(star);
+  }
 }
 
 function showFinale() {
@@ -473,6 +643,7 @@ document.querySelector(".identity").addEventListener("click", () => {
   // Returning to the title is not "begin the suite again": it must never clear
   // progress, so it reloads the current field rather than calling resetExperience.
   closeFinale();
+  closeAttunement();
   loadField(firstUnfinishedField());
   started = false;
   experience.hidden = true;
@@ -486,9 +657,12 @@ document.querySelector(".identity").addEventListener("click", () => {
 canvas.addEventListener("pointermove", (event) => (pointer = { x: event.clientX, y: event.clientY }));
 canvas.addEventListener("pointerleave", () => (pointer = { x: -1000, y: -1000 }));
 canvas.addEventListener("pointerdown", (event) => awakenAt(event.clientX, event.clientY));
+attuneReplay.addEventListener("click", playSequence);
+attuneLeave.addEventListener("click", () => closeAttunement(keyboardAction));
+
 keyboardAction.addEventListener("click", () => {
   const next = memoryStars.find((star) => !star.found);
-  if (next) awaken(next);
+  if (next) openAttunement(next);
 });
 paletteButton.addEventListener("click", () => {
   paletteIndex = (paletteIndex + 1) % palettes.length;
@@ -521,9 +695,12 @@ nextButton.addEventListener("click", goToNextField);
 finaleClose.addEventListener("click", closeFinale);
 // An overlay with no Escape is a keyboard trap in everything but name.
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !finale.hidden) closeFinale();
+  if (event.key !== "Escape") return;
+  // The attunement is the innermost thing open, so it leaves first.
+  if (attuneStar) closeAttunement(keyboardAction);
+  else if (!finale.hidden) closeFinale();
 });
-window.addEventListener("resize", resize);
+window.addEventListener("resize", () => { resize(); positionSatellites(); });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) cancelAnimationFrame(animationFrame);
   else animationFrame = requestAnimationFrame(draw);

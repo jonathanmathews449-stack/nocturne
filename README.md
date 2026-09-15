@@ -4,9 +4,12 @@
 
 Nocturne is a cinematic, dependency-free interactive experience built for the modern
 web. It is a suite of three fields — three poems, three constellations, three
-atmospheres. Move through a generative star field, awaken the five memory stars of a
-field, and its poem reveals one line at a time. Finish a field and the next sky opens;
-finish all three and the suite closes.
+atmospheres — and one arc: it opens grateful about the earth and does not stay that
+way.
+
+Each memory star plays a short sequence across five satellites and asks you to echo
+it back. The sequences lengthen as you go deeper, and the final field asks for them
+backwards. There is no fail state; a wrong answer simply plays the sequence again.
 
 Progress is kept in `localStorage` behind guards, so the site resumes where you left
 off and still works perfectly where storage is blocked — it simply forgets.
@@ -15,7 +18,9 @@ off and still works perfectly where storage is blocked — it simply forgets.
 
 - Responsive animated canvas with cursor parallax and particle effects
 - Three fields, each with its own poem, constellation and atmosphere
-- Five-part constellation discovery per field, with a field journal on the title screen
+- Five sequence puzzles per field — each star plays a pattern you echo back
+- Sequences lengthen as you go deeper, and the last field asks for them backwards
+- A field journal on the title screen, with replay for finished fields
 - Saved progress that resumes at the first unfinished field
 - Procedurally generated ambient chimes with the Web Audio API
 - Three live color atmospheres
