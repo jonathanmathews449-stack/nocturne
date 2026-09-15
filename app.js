@@ -23,6 +23,9 @@ const finaleTitle = document.querySelector("#finale-title");
 const finaleNote = document.querySelector("#finale-note");
 const editionLabel = document.querySelector("#edition");
 const statusRegion = document.querySelector("#status");
+const enterLabel = document.querySelector("#enter-label");
+const journalProgress = document.querySelector("#journal-progress");
+const journalList = document.querySelector("#journal-list");
 
 /* Three fields, three movements. Each carries its own poem, its own five stars
    and the palette it opens in — which is why the palette list is ordered to
@@ -125,6 +128,7 @@ let height = 0;
 let dpr = 1;
 let started = false;
 let found = 0;
+let replayingField = false;
 let paletteIndex = 0;
 let soundEnabled = false;
 let audioContext;
@@ -303,11 +307,49 @@ function firstUnfinishedField() {
   return next === -1 ? 0 : next;
 }
 
+function renderJournal() {
+  const suiteComplete = FIELDS.every((field) => completed.includes(field.id));
+  const nextIndex = firstUnfinishedField();
+  journalProgress.textContent = `${completed.length} of ${FIELDS.length} skies found`;
+  enterLabel.textContent = completed.length === 0
+    ? "Enter the field"
+    : suiteComplete
+      ? "Revisit Field 01"
+      : `Continue to ${FIELDS[nextIndex].edition}`;
+
+  const entries = FIELDS.map((field, index) => {
+    const isComplete = completed.includes(field.id);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "journal-field";
+    button.dataset.fieldIndex = String(index);
+    button.disabled = !isComplete;
+    button.setAttribute("aria-label", isComplete
+      ? `Replay ${field.edition}: ${field.title}`
+      : `${field.edition}: not yet found`);
+
+    const number = document.createElement("span");
+    number.className = "journal-number";
+    number.textContent = String(index + 1).padStart(2, "0");
+    const copy = document.createElement("span");
+    copy.className = "journal-copy";
+    const title = document.createElement("strong");
+    title.textContent = field.title;
+    const state = document.createElement("span");
+    state.textContent = isComplete ? "Found · replay" : "Still waiting";
+    copy.append(title, state);
+    button.append(number, copy);
+    return button;
+  });
+  journalList.replaceChildren(...entries);
+}
+
 function markFieldComplete() {
   const id = FIELDS[fieldIndex].id;
   if (!completed.includes(id)) {
     completed = completed.concat(id);
     writeProgress(completed);
+    renderJournal();
   }
 }
 
@@ -336,26 +378,30 @@ function showFinale() {
   lineReveal.classList.remove("visible");
   const field = FIELDS[fieldIndex];
   const allDone = FIELDS.every((f) => completed.includes(f.id));
-  finaleTitle.textContent = allDone ? "Three skies, and the dark between them" : field.title;
+  const suiteJustFinished = allDone && !replayingField && fieldIndex === FIELDS.length - 1;
+  finaleTitle.textContent = suiteJustFinished ? "Three skies, and the dark between them" : field.title;
   completedPoem.textContent = poemLines.join("\n");
-  finaleNote.textContent = allDone
+  finaleNote.textContent = suiteJustFinished
     ? "That is the whole suite. The fields keep what you found; begin again whenever the night is long."
-    : `Field ${fieldIndex + 1} of ${FIELDS.length}. There is another sky waiting.`;
-  nextButton.hidden = allDone;
-  restartButton.textContent = allDone ? "Begin the suite again" : "Wander this field again";
+    : replayingField
+      ? `${field.edition} revisited. Your field journal stays intact.`
+      : `Field ${fieldIndex + 1} of ${FIELDS.length}. There is another sky waiting.`;
+  nextButton.hidden = replayingField || allDone;
+  restartButton.textContent = suiteJustFinished ? "Begin the suite again" : "Wander this field again";
   finale.hidden = false;
   // The next field is the thing to do, so it is the thing that gets focus —
   // except at the end of the suite, where it is hidden and cannot hold any.
-  (allDone ? restartButton : nextButton).focus();
-  setStatus(allDone
+  (nextButton.hidden ? restartButton : nextButton).focus();
+  setStatus(suiteJustFinished
     ? "The suite is complete. All three fields found."
-    : `Field ${fieldIndex + 1} complete. ${poemLines.join(" ")}`);
+    : `${field.edition} complete. ${poemLines.join(" ")}`);
 }
 
 function goToNextField() {
   const next = fieldIndex + 1;
   if (next >= FIELDS.length) return;
   closeFinale();
+  replayingField = false;
   loadField(next);
   setStatus(`${FIELDS[next].edition}. Five fragments are waiting.`);
   announceField();
@@ -386,9 +432,11 @@ function closeFinale() {
 
 function resetExperience() {
   // "Begin again" after the whole suite starts the suite over, progress and all.
-  if (FIELDS.every((f) => completed.includes(f.id))) {
+  if (FIELDS.every((f) => completed.includes(f.id)) && !replayingField) {
     completed = [];
     writeProgress(completed);
+    replayingField = false;
+    renderJournal();
     closeFinale();
     loadField(0);
     setStatus("The suite begins again. Field 01.");
@@ -399,10 +447,11 @@ function resetExperience() {
   loadField(fieldIndex);
 }
 
-function begin() {
+function begin(index = firstUnfinishedField()) {
   if (started) return;
   started = true;
-  loadField(firstUnfinishedField());
+  replayingField = completed.includes(FIELDS[index].id);
+  loadField(index);
   intro.classList.add("is-leaving");
   burst(width * 0.5, height * 0.5, 80);
   chime(0);
@@ -414,15 +463,21 @@ function begin() {
   }, 650);
 }
 
-enterButton.addEventListener("click", begin);
+enterButton.addEventListener("click", () => begin());
+journalList.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-field-index]");
+  if (!button || button.disabled) return;
+  begin(Number(button.dataset.fieldIndex));
+});
 document.querySelector(".identity").addEventListener("click", () => {
   // Returning to the title is not "begin the suite again": it must never clear
   // progress, so it reloads the current field rather than calling resetExperience.
   closeFinale();
-  loadField(fieldIndex);
+  loadField(firstUnfinishedField());
   started = false;
   experience.hidden = true;
   intro.hidden = false;
+  renderJournal();
   // Same reason as closeFinale: whatever had focus is inside the section that
   // just went away.
   enterButton.focus({ preventScroll: true });
@@ -474,5 +529,7 @@ document.addEventListener("visibilitychange", () => {
   else animationFrame = requestAnimationFrame(draw);
 });
 
+loadField(firstUnfinishedField());
 resize();
+renderJournal();
 draw();

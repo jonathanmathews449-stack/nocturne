@@ -58,11 +58,20 @@
 
       <main>
         <section class="intro" id="intro" aria-labelledby="intro-title">
-          <p class="kicker"><span></span>An interactive poem</p>
-          <h1 id="intro-title">The night<br />remembers<br /><em>your touch.</em></h1>
-          <p class="intro-copy">Five bright fragments are waiting in the dark. Find them, and the sky will write back — then there are two more skies after this one.</p>
-          <button class="enter-button" id="enter-button" type="button"><span>Enter the field</span><span class="arrow" aria-hidden="true">↗</span></button>
-          <p class="intro-note">Headphones make the silence sing.</p>
+          <div class="intro-lead">
+            <p class="kicker"><span></span>An interactive poem</p>
+            <h1 id="intro-title">The night<br />remembers<br /><em>your touch.</em></h1>
+            <p class="intro-copy">Five bright fragments are waiting in the dark. Find them, and the sky will write back — then there are two more skies after this one.</p>
+            <button class="enter-button" id="enter-button" type="button"><span id="enter-label">Enter the field</span><span class="arrow" aria-hidden="true">↗</span></button>
+            <p class="intro-note">Headphones make the silence sing.</p>
+          </div>
+          <section class="field-journal" aria-labelledby="journal-title">
+            <div class="journal-heading">
+              <h2 id="journal-title">Field journal</h2>
+              <p id="journal-progress" aria-live="polite">0 of 3 skies found</p>
+            </div>
+            <div class="journal-list" id="journal-list"></div>
+          </section>
         </section>
 
         <section class="experience" id="experience" aria-label="Interactive constellation" hidden>
